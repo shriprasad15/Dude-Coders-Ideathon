@@ -1,0 +1,11 @@
+ultralytics
+roboflow
+Pillow
+pandas
+openpyxl
+requests
+opencv-python
+numpy
+scipy
+python-dotenv
+pyyaml
