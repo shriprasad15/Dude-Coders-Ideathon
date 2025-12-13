@@ -50,18 +50,33 @@ GOOGLE_MAPS_API_KEY=your_key_here
 To run the model on the data in `EI_train_data.xlsx`:
 
 ```bash
-# Run on the all samples (Auto-install dependencies if needed)
+```bash
+# Run on all samples (Auto-install dependencies if needed)
 ./run_inference.sh
 ```
 
-```bash
-# Run on the first 10 samples (Auto-install dependencies if needed)
-./run_inference.sh --limit 10
-```
+### Supported Arguments
+The `run_inference.sh` script passes all arguments directly to the python inference engine.
 
-To run on specific Sample IDs:
+| Argument | Description | Example |
+| :--- | :--- | :--- |
+| `--limit` | Process only the first N samples | `./run_inference.sh --limit 10` |
+| `--samples` | Process specific Sample IDs or ranges | `./run_inference.sh --samples "1-5,20,55-60"` |
+| `--input` | Use a custom Excel input file | `./run_inference.sh --input data/my_sites.xlsx` |
+| `--initial-conf` | Set initial detection confidence threshold | `./run_inference.sh --initial-conf 0.25` |
+| `--fallback-conf` | Set fallback detection confidence threshold | `./run_inference.sh --fallback-conf 0.10` |
+
+### Custom Input Requirements
+When using `--input`, your Excel file **must** contain the following columns:
+- `sample_id` (or `sampleid`)
+- `latitude`
+- `longitude`
+
+**Note**: The default input file is `EI_train_data.xlsx`.
+
+To run on a custom Excel input file (must have `sample_id`, `latitude`, `longitude`):
 ```bash
-./run_inference.sh --samples "1-5,20,55-60"
+./run_inference.sh --input path/to/your_data.xlsx
 ```
 
 ## Output

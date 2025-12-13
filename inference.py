@@ -97,11 +97,35 @@ def run_inference_fallback(
     model = YOLO(model_path)
     
     print(f"Reading data from {excel_path}...")
-    df = pd.read_excel(excel_path)
+    print(f"Reading data from {excel_path}...")
+    try:
+        df = pd.read_excel(excel_path)
+    except Exception as e:
+        print(f"Error reading Excel file: {e}")
+        sys.exit(1)
+
+    # Column Normalization & Validation
+    # 1. Normalize 'sampleid' to 'sample_id'
+    if 'sampleid' in df.columns:
+        df.rename(columns={'sampleid': 'sample_id'}, inplace=True)
     
+    # 2. Check for mandatory columns
+    required_columns = ['sample_id', 'latitude', 'longitude']
+    missing_cols = [col for col in required_columns if col not in df.columns]
+    
+    if missing_cols:
+        print(f"Error: Input Excel is missing mandatory columns: {missing_cols}")
+        print(f"Required columns: {required_columns}")
+        print(f"Found columns: {df.columns.tolist()}")
+        sys.exit(1)
+
     # Filter by sample_ids if provided
     if sample_ids:
-        df = df[df['sampleid'].isin(sample_ids)]
+        # ensuring matching types for filtering
+        df['sample_id'] = df['sample_id'].astype(str).str.replace(r'\.0$', '', regex=True)
+        # Convert input sample_ids to strings for comparison
+        str_sample_ids = [str(sid) for sid in sample_ids]
+        df = df[df['sample_id'].isin(str_sample_ids)]
         print(f"Filtering to {len(df)} samples with IDs: {sample_ids}")
     elif limit:
         df = df.head(limit)
@@ -123,7 +147,7 @@ def run_inference_fallback(
     print(f"\nStarting fallback inference (initial_conf={initial_conf}, fallback_conf={fallback_conf})...")
     
     for idx, row in df.iterrows():
-        sample_id = row.get('sampleid', idx)
+        sample_id = row.get('sample_id', idx)
         lat = row.get('latitude', 0)
         lon = row.get('longitude', 0)
         
@@ -395,6 +419,7 @@ def run_inference_fallback(
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Inference with buffer-based fallback")
     parser.add_argument('--limit', type=int, default=None, help="Limit number of samples")
+    parser.add_argument('--input', type=str, default="EI_train_data.xlsx", help="Path to input Excel file")
     parser.add_argument('--model', type=str, default="best.pt")
     parser.add_argument('--initial-conf', type=float, default=0.15, help="Initial confidence threshold")
     parser.add_argument('--fallback-conf', type=float, default=0.05, help="Fallback confidence threshold")
@@ -415,6 +440,7 @@ if __name__ == "__main__":
         print(f"Running on sample IDs: {sample_ids}")
     
     run_inference_fallback(
+        excel_path=args.input,
         limit=args.limit,
         model_path=args.model,
         initial_conf=args.initial_conf,
