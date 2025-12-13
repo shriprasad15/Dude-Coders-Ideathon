@@ -62,6 +62,27 @@ Results are generated in the `outputs/` folder:
 -   **NOT_VERIFIABLE**:
     -   Solar Panel Found but with **Low Confidence (<= 70%)**.
 
+## Technical Methodology
+### 1. Multi-Stage Fallback Strategy
+To address challenges with small panels and low-contrast satellite imagery, we implemented a robust **6-stage fallback mechanism**. If a panel is not detected in the initial pass, the system progressively relaxes constraints and applies enhancements:
+
+1.  **Initial Check (1200 sqft)**: Check for panels within a small 1200 sqft buffer (approx. residential roof size) from the standard inference.
+2.  **Saturated Check (1200 sqft)**: If failed, saturate the image (HSV +50%) to boost contrast and re-run inference.
+3.  **Cropped Check (1200 sqft)**: If failed, physically crop the image to the 1200 sqft region and re-run inference (improves relative object size).
+4.  **Saturated Crop Check (1200 sqft)**: Combine cropping and saturation.
+5.  **Expanded Check (2400 sqft)**: If still failed, repeat the initial check on a larger 2400 sqft buffer.
+6.  **Expanded Saturated Check (2400 sqft)**: Final attempt using saturation on the larger buffer.
+
+### 2. Advanced Training Strategy
+-   **Hard Negative Sampling**: We explicitly trained the model on "negative" samples—satellite images of rooftops *without* solar panels—to drastically reduce false positives. This forces the model to learn the specific features of solar panels rather than just "rectangular things on roofs."
+-   **Data Augmentation**: Heavy use of Mosaic, Mixup, and HSV augmentation during training to generalize across different lighting conditions and resolutions.
+
+## Model Performance
+The model utilizes **YOLOv12** architecture fine-tuned on our custom dataset.
+
+![Validation Batch Predictions](training_logs/val_batch0_pred.jpg)
+*(Validation Batch Predictions: Ground Truth vs Model Output)*
+
 ## Training
 To retrain the model:
 1.  Ensure data is prepared in `data_segmented`.
