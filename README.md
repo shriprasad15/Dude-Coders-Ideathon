@@ -4,6 +4,8 @@
 This repository contains an end-to-end pipeline for detecting solar panels in satellite imagery. It uses a fine-tuned YOLOv12 model with a specialized multi-stage fallback inference strategy to handle difficult cases (small panels, low contrast).
 
 ![Audit Example](outputs/audit_images/1.0.jpg)
+
+
 *(Green: Selected Panel, Red: Rejected Candidates)*
 
 ## Deliverables Structure
