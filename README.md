@@ -50,6 +50,11 @@ GOOGLE_MAPS_API_KEY=your_key_here
 To run the model on the data in `EI_train_data.xlsx`:
 
 ```bash
+# Run on the all samples (Auto-install dependencies if needed)
+./run_inference.sh
+```
+
+```bash
 # Run on the first 10 samples (Auto-install dependencies if needed)
 ./run_inference.sh --limit 10
 ```
