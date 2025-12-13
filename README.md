@@ -10,18 +10,23 @@ This repository contains an end-to-end pipeline for detecting solar panels in sa
 
 ## Deliverables Structure
 ```
-solar_project_package/
+Dude-Coders-Ideathon/
 ├── inference.py          # Main inference pipeline code
 ├── train.py              # Training script (V2 with hard negative mining)
 ├── utils.py              # Geometry and visualization utilities
 ├── image_retriever.py    # Google Maps Image Downloader
+├── evaluate_results.py   # Script to evaluate inference against ground truth
 ├── requirements.txt      # Python dependencies
+├── python_version.txt    # Python version information
 ├── run_inference.sh      # AUTOMATION SCRIPT (Setup + Run)
 ├── best.pt               # Trained Model Weights
 ├── EI_train_data.xlsx    # Input Dataset
 ├── .env                  # API Keys (Google Maps)
 ├── MODEL_CARD.md         # Detailed Model Documentation
-└── training_logs/        # Logs from model training
+├── Model_Card.pdf        # PDF version of Model Card
+├── LICENSE               # License file
+├── training_logs/        # Logs from model training
+└── outputs/              # Directory for inference results and audit images
 ```
 
 ## Setup & Installation
