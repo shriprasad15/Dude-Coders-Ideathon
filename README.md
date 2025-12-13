@@ -27,6 +27,8 @@ Dude-Coders-Ideathon/
 ├── LICENSE               # License file
 ├── training_logs/        # Logs from model training
 └── outputs/              # Directory for inference results and audit images
+    ├── results.json      # Structural JSON output with detection details
+    └── audit_images/     # Visual audit frames (Green: Accepted, Red: Rejected)
 ```
 
 ## Setup & Installation
@@ -87,8 +89,6 @@ To address challenges with small panels and low-contrast satellite imagery, we i
 ## Model Performance
 The model utilizes **YOLOv12** architecture fine-tuned on our custom dataset.
 
-![Validation Batch Predictions](training_logs/val_batch0_pred.jpg)
-*(Validation Batch Predictions: Ground Truth vs Model Output)*
 
 ## Training
 To retrain the model:
