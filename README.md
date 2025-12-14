@@ -31,6 +31,7 @@ Dude-Coders-Ideathon/
     └── audit_images/     # Visual audit frames (Green: Accepted, Red: Rejected)
 ```
 
+
 ## Setup & Installation
 
 **Prerequisite**: Linux/MacOS with Python 3.8+.
