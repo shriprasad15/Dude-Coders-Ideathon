@@ -9,3 +9,7 @@ numpy
 scipy
 python-dotenv
 pyyaml
+fastapi
+uvicorn
+python-multipart
+google-generativeai

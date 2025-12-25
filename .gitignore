@@ -1,3 +1,5 @@
 venv
 .env
 Model_card.tex
+*node_env
+*node_modules

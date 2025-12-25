@@ -81,7 +81,7 @@ To run on a custom Excel input file (must have `sample_id`, `latitude`, `longitu
 
 ## Output
 Results are generated in the `outputs/` folder:
--   **`results.json`**: Structural JSON output containing detection status, confidence, estimated area, and metadata.
+-   **`results.json`**: Structural JSON output containing detection status, confidence, estimated area, distance, and metadata.
 -   **`audit_images/`**: Visual audit frames showing the detected panels (Green) and rejected candidates (Red).
 
 ## QC Status Logic
@@ -118,3 +118,27 @@ To retrain the model:
     python train.py
     ```
 3.  Logs will be saved to `outputs/training/yolov12_v2`.
+
+## Web Application (Smart Search)
+The project includes a React-based frontend and FastAPI backend for the "Smart Search" feature (Solar Analysis Chat).
+
+### 1. Start Backend
+Run this in a separate terminal from the root directory:
+```bash
+# Activate Virtual Environment
+source venv/bin/activate
+
+# Start the API Server
+python -m backend.main
+```
+*Server runs at: http://localhost:8000*
+
+### 2. Start Frontend
+Run this in a separate terminal:
+```bash
+cd frontend
+
+# Start the Dev Server
+./npm_portable.sh run dev
+```
+*App runs at: http://localhost:5173*

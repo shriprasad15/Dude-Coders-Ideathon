@@ -303,9 +303,19 @@ def run_inference_fallback(
                                 print(f"  -> NOT FOUND in any buffer/method")
 
         # Calculate final area if found
+        final_dist_m = 0.0
         if final_has_solar:
              box_area_pixels = calculate_box_area_pixels(final_bbox)
              final_pv_area_sqm = box_area_pixels * (meters_per_pixel ** 2)
+             
+             # Calculate Euclidean distance from image center (lat,lon) to panel centroid
+             # center is (w//2, h//2)
+             bx1, by1, bx2, by2 = final_bbox
+             cx_box = (bx1 + bx2) / 2
+             cy_box = (by1 + by2) / 2
+             
+             dist_px = np.sqrt((cx_box - center[0])**2 + (cy_box - center[1])**2)
+             final_dist_m = dist_px * meters_per_pixel
         
         # 6. Create result record
         # Format sample_id as string "1", "2" etc (stripping .0)
@@ -346,6 +356,7 @@ def run_inference_fallback(
             "has_solar": bool(final_has_solar),
             "confidence": round(final_confidence, 4),
             "pv_area_sqm_est": round(final_pv_area_sqm, 2),
+            "euclidean_distance_m_est": round(final_dist_m, 2),
             "buffer_radius_sqft": final_buffer_size,
             "qc_status": qc_status,
             "bbox_or_mask": [list(final_bbox)] if final_has_solar else [],
