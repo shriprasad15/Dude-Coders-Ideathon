@@ -1257,9 +1257,63 @@ Use the chat interface to upload data files or ask questions about locations.
                                             <span className="text-xs text-gray-500 uppercase tracking-wider font-bold">CSV, Excel</span>
 
                                             {isBulkAnalyzing && (
-                                                <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center backdrop-blur-sm rounded-2xl">
-                                                    <Loader2 className="w-8 h-8 text-blue-500 animate-spin mb-2" />
-                                                    <span className="text-xs font-bold text-blue-400">Processing Locations...</span>
+                                                <div className="absolute inset-0 z-50 bg-[#0a0a0a] flex flex-col items-center justify-center rounded-2xl overflow-hidden border border-blue-500/20">
+
+                                                    {/* COLLIDING BLUE LINE ANIMATION */}
+                                                    <div className="absolute top-0 left-0 right-0 h-1 bg-white/5 overflow-hidden z-20">
+                                                        <motion.div
+                                                            initial={{ left: "0%", right: "100%" }}
+                                                            animate={{
+                                                                left: ["0%", "45%", "0%"],
+                                                                right: ["100%", "45%", "100%"]
+                                                            }}
+                                                            transition={{
+                                                                duration: 2,
+                                                                ease: "easeInOut",
+                                                                repeat: Infinity,
+                                                                times: [0, 0.5, 1]
+                                                            }}
+                                                            className="absolute top-0 bottom-0 bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.8)]"
+                                                        />
+                                                        <motion.div
+                                                            initial={{ left: "100%", right: "0%" }}
+                                                            animate={{
+                                                                left: ["100%", "55%", "100%"],
+                                                                right: ["0%", "55%", "0%"]
+                                                            }}
+                                                            transition={{
+                                                                duration: 2,
+                                                                ease: "easeInOut",
+                                                                repeat: Infinity,
+                                                                times: [0, 0.5, 1]
+                                                            }}
+                                                            className="absolute top-0 bottom-0 bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.8)]"
+                                                        />
+                                                    </div>
+
+                                                    {/* Skeleton Content */}
+                                                    <div className="w-full h-full p-6 relative flex flex-col">
+                                                        <motion.div
+                                                            variants={shimmer}
+                                                            initial="hidden"
+                                                            animate="visible"
+                                                            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent z-10"
+                                                        />
+
+                                                        <div className="flex-1 flex flex-col items-center justify-center space-y-4 opacity-50">
+                                                            <div className="w-16 h-16 rounded-full bg-white/10 animate-pulse" />
+                                                            <div className="h-4 w-3/4 bg-white/10 rounded animate-pulse" />
+                                                            <div className="h-3 w-1/2 bg-white/10 rounded animate-pulse" />
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="absolute inset-0 flex items-center justify-center z-20">
+                                                        <div className="bg-black/80 px-4 py-2 rounded-lg backdrop-blur-md border border-white/10 shadow-xl flex items-center gap-3">
+                                                            <Loader2 className="w-4 h-4 text-blue-400 animate-spin" />
+                                                            <span className="text-xs font-bold text-blue-400 tracking-wider uppercase">Processing Locations...</span>
+                                                        </div>
+                                                    </div>
+
                                                 </div>
                                             )}
                                         </div>
