@@ -1000,7 +1000,7 @@ Use the chat interface to upload data files or ask questions about locations.
                                 exit={{ opacity: 0 }}
                                 className="absolute inset-0 z-50 p-4 md:p-12 flex items-center justify-center bg-black/40 backdrop-blur-sm"
                             >
-                                <div className="bg-black border border-white/10 rounded-3xl shadow-2xl overflow-hidden w-full max-w-5xl h-[85vh] flex flex-col md:flex-row relative">
+                                <div className="bg-black border border-white/10 rounded-3xl shadow-2xl overflow-hidden w-full max-w-5xl h-[85vh] flex flex-col lg:flex-row relative">
 
                                     {/* 1. COLLIDING BLUE LINE ANIMATION (Top Bar) */}
                                     <div className="absolute top-0 left-0 right-0 h-1 bg-white/5 overflow-hidden z-20">
@@ -1037,7 +1037,8 @@ Use the chat interface to upload data files or ask questions about locations.
                                     {/* SKELETON CONTENT */}
 
                                     {/* Image Side Skeleton */}
-                                    <div className="w-full md:w-2/3 h-64 md:h-full relative bg-[#111] overflow-hidden group">
+                                    {/* Image Side Skeleton */}
+                                    <div className="w-full lg:w-2/3 h-64 lg:h-full relative bg-[#111] overflow-hidden group">
                                         {/* Shimmer Effect */}
                                         <motion.div variants={shimmer} initial="hidden" animate="visible" className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent z-10" />
 
@@ -1052,7 +1053,7 @@ Use the chat interface to upload data files or ask questions about locations.
                                     </div>
 
                                     {/* Detail Side Skeleton */}
-                                    <div className="w-full md:w-1/3 p-8 flex flex-col bg-black border-l border-white/5 overflow-hidden relative">
+                                    <div className="w-full lg:w-1/3 p-8 flex flex-col bg-black border-l border-white/5 overflow-hidden relative">
                                         <motion.div variants={shimmer} initial="hidden" animate="visible" className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent z-10 pointer-events-none" />
 
                                         <div className="mb-6">
@@ -1089,11 +1090,11 @@ Use the chat interface to upload data files or ask questions about locations.
                                 exit={{ opacity: 0, scale: 0.95 }}
                                 className="absolute inset-0 z-50 p-4 md:p-12 flex items-center justify-center bg-black/40 backdrop-blur-sm"
                             >
-                                <div className="bg-black border border-white/10 rounded-3xl shadow-2xl overflow-hidden w-full max-w-5xl h-[85vh] flex flex-col md:flex-row relative">
+                                <div className="bg-black border border-white/10 rounded-3xl shadow-2xl overflow-hidden w-full max-w-5xl h-[85vh] flex flex-col lg:flex-row relative">
                                     <button onClick={closePopup} className="absolute top-4 right-4 z-50 p-2 bg-black/50 hover:bg-black rounded-full text-white border border-white/10 transition-colors"><X className="w-6 h-6" /></button>
 
                                     {/* Image */}
-                                    <div className="w-full md:w-2/3 h-64 md:h-full relative bg-[#111]">
+                                    <div className="w-full lg:w-2/3 h-64 lg:h-full relative bg-[#111]">
                                         <button
                                             onClick={(e) => {
                                                 e.stopPropagation();
@@ -1119,7 +1120,7 @@ Use the chat interface to upload data files or ask questions about locations.
                                     </div>
 
                                     {/* Details */}
-                                    <div className="w-full md:w-1/3 p-8 flex flex-col overflow-y-auto bg-black border-l border-white/5">
+                                    <div className="w-full lg:w-1/3 p-8 flex flex-col overflow-y-auto bg-black border-l border-white/5">
                                         <div className="mb-6">
                                             <div className="text-gray-500 text-xs font-bold uppercase tracking-widest mb-1">Confidence</div>
                                             <div className="flex items-end gap-3">
