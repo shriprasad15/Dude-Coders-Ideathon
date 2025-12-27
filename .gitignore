@@ -3,3 +3,4 @@ venv
 Model_card.tex
 *node_env
 *node_modules
+frontend/dist
