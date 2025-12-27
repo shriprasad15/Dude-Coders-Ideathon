@@ -37,10 +37,7 @@ class InferenceService:
                 x1, y1, x2, y2 = box
                 w = x2 - x1
                 h = y2 - y1
-                area_sqm = (w * h) * (meters_per_pixel ** 2)
-                if area_sqm > 300.0:
-                    continue
-                    
+
             overlap = calculate_intersection_area(box, center, radius_pixels)
             if overlap > best_overlap:
                 best_overlap = overlap
@@ -73,7 +70,8 @@ class InferenceService:
         final_buffer_size = 2400
         final_bbox = []
         final_confidence = 0.0
-        
+        detection_method = "initial"
+
         # Strategy Implementation
         # Try 1200 Initial
         best_idx, _ = self.find_best_panel_in_buffer(boxes, confidences, center, radius_1200, meters_per_pixel)
@@ -83,6 +81,7 @@ class InferenceService:
             final_buffer_size = 1200
             final_bbox = boxes[best_idx]
             final_confidence = confidences[best_idx]
+            detection_method = "initial"
         else:
             # Try 1200 Saturated
             img_sat = self.enhance_saturation(img)
@@ -97,6 +96,7 @@ class InferenceService:
                 final_buffer_size = 1200
                 final_bbox = sat_boxes[best_sat]
                 final_confidence = sat_confs[best_sat]
+                detection_method = "saturated_1200"
                 boxes = sat_boxes # For visualization
             else:
                 # Try 1200 Crop
@@ -109,6 +109,7 @@ class InferenceService:
                     final_buffer_size = 1200
                     final_bbox = c_boxes[best_crop]
                     final_confidence = c_confs[best_crop]
+                    detection_method = "crop_1200"
                     boxes = c_boxes
                 else:
                     # Try 2400 Initial (Fallback to larger buffer if 1200 fails entirely)
@@ -118,6 +119,48 @@ class InferenceService:
                         final_buffer_size = 2400
                         final_bbox = boxes[best_2400]
                         final_confidence = confidences[best_2400]
+                        detection_method = "initial_2400"
+        
+        # --- Rescue Step ---
+        if not final_has_solar:
+             best_rescue_idx = -1
+             min_dist = float('inf')
+             rescue_threshold_px = radius_2400 * 2.0 
+             
+             for i, box in enumerate(boxes):
+                 # Calculate distance from center to box center
+                 bx1, by1, bx2, by2 = box
+                 cx_box = (bx1 + bx2) / 2
+                 cy_box = (by1 + by2) / 2
+                 dist = np.sqrt((cx_box - center[0])**2 + (cy_box - center[1])**2)
+                 
+                 # Logic: Must be confident (>0.40) and reasonably close
+                 if confidences[i] > 0.40 and dist < min_dist:
+                     min_dist = dist
+                     best_rescue_idx = i
+             
+             if best_rescue_idx != -1 and min_dist < rescue_threshold_px:
+                 final_has_solar = True
+                 final_buffer_size = 2400 
+                 final_bbox = boxes[best_rescue_idx]
+                 final_confidence = confidences[best_rescue_idx]
+                 detection_method = "rescued_off_center"
+        
+        # Calculate final metrics if found
+        final_pv_area_sqm = 0.0
+        final_dist_m = 0.0
+        
+        if final_has_solar:
+             box_area_pixels = calculate_box_area_pixels(final_bbox)
+             final_pv_area_sqm = box_area_pixels * (meters_per_pixel ** 2)
+             
+             # Calculate Euclidean distance from image center to panel centroid
+             bx1, by1, bx2, by2 = final_bbox
+             cx_box = (bx1 + bx2) / 2
+             cy_box = (by1 + by2) / 2
+             
+             dist_px = np.sqrt((cx_box - center[0])**2 + (cy_box - center[1])**2)
+             final_dist_m = dist_px * meters_per_pixel
         
         # Visualization
         final_radius = calculate_radius_from_area_sqft(final_buffer_size, meters_per_pixel)
@@ -135,5 +178,8 @@ class InferenceService:
             "confidence": final_confidence,
             "bbox": final_bbox,
             "vis_image": vis_img,
-            "buffer_size": final_buffer_size
+            "buffer_size": final_buffer_size,
+            "pv_area_sqm": final_pv_area_sqm,
+            "euclidean_distance": final_dist_m,
+            "detection_method": detection_method
         }

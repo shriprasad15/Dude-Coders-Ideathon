@@ -1,6 +1,6 @@
 import requests
 
-URL = "http://localhost:8000/smart-search"
+URL = "https://sue-asymmetric-nonprogressively.ngrok-free.dev/smart-search"
 
 def test_query(description, query, file_path=None):
     print(f"\n--- Testing: {description} ---")
