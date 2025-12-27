@@ -592,7 +592,8 @@ Use the chat interface to upload data files or ask questions about locations.
 
 
     return (
-        <div className="flex flex-col h-screen w-screen bg-black text-white font-sans selection:bg-white/30 overflow-hidden">
+        // Use dvh (dynamic viewport height) to account for mobile browser bars
+        <div className="flex flex-col h-screen supports-[height:100dvh]:h-[100dvh] w-screen bg-black text-white font-sans selection:bg-white/30 overflow-hidden">
 
             {/* 1. Navbar */}
             <nav className="flex-none h-16 px-6 md:px-8 flex items-center justify-between border-b border-white/10 z-50 bg-black">
@@ -937,8 +938,8 @@ Use the chat interface to upload data files or ask questions about locations.
                         )}
                     </GoogleMap>
 
-                    {/* Controls */}
-                    <div className="absolute bottom-8 right-8 flex flex-col gap-2 z-20 items-center">
+                    {/* Controls - Updated for better mobile visibility */}
+                    <div className="absolute bottom-28 md:bottom-8 right-4 md:right-8 flex flex-col gap-2 z-20 items-center">
                         {/* Locate Me Button */}
                         <motion.button
                             onClick={handleLocateMe}
@@ -968,7 +969,7 @@ Use the chat interface to upload data files or ask questions about locations.
                         </div>
                     </div>
 
-                    {/* Overlays: Confirmation */}
+                    {/* Overlays: Confirmation - Updated position */}
                     <AnimatePresence>
                         {isConfirming && selectedLocation && (
                             <motion.div
@@ -976,7 +977,7 @@ Use the chat interface to upload data files or ask questions about locations.
                                 initial={{ y: 20, opacity: 0 }}
                                 animate={{ y: 0, opacity: 1 }}
                                 exit={{ y: 20, opacity: 0 }}
-                                className="absolute bottom-6 left-6 right-6 md:left-auto md:right-auto md:w-96 z-30 pointer-events-none"
+                                className="absolute bottom-24 left-6 right-6 md:bottom-6 md:left-auto md:right-auto md:w-96 z-30 pointer-events-none"
                             >
                                 <div className="bg-black border border-white/10 p-6 rounded-2xl shadow-2xl pointer-events-auto">
                                     <h3 className="font-bold text-white text-lg mb-1">Confirm Location?</h3>
