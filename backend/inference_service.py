@@ -29,16 +29,23 @@ class InferenceService:
         return cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
 
     def find_best_panel_in_buffer(self, boxes, confidences, center, radius_pixels, meters_per_pixel=None):
+        """
+        Find the panel with largest overlap within the buffer region.
+        """
         best_overlap = 0
         best_idx = -1
         
         for i, box in enumerate(boxes):
+            # Calculate panel area in sqm if meters_per_pixel provided (for debug/filtering)
             if meters_per_pixel is not None:
                 x1, y1, x2, y2 = box
                 w = x2 - x1
                 h = y2 - y1
+                area_sqm = (w * h) * (meters_per_pixel ** 2)
+                # Could add size check here if needed, consistent with inference.py
 
             overlap = calculate_intersection_area(box, center, radius_pixels)
+            
             if overlap > best_overlap:
                 best_overlap = overlap
                 best_idx = i
@@ -56,7 +63,7 @@ class InferenceService:
         initial_conf = 0.15
         fallback_conf = 0.05
         
-        # 1. Initial Inference
+        # 1. Initial Inference on FULL image
         results = self.model.predict(img, conf=initial_conf, augment=True, save=False, verbose=False)
         result = results[0]
         boxes = result.boxes.xyxy.tolist() if result.boxes else []
@@ -72,56 +79,97 @@ class InferenceService:
         final_confidence = 0.0
         detection_method = "initial"
 
-        # Strategy Implementation
-        # Try 1200 Initial
-        best_idx, _ = self.find_best_panel_in_buffer(boxes, confidences, center, radius_1200, meters_per_pixel)
+        # --- STEP 1: Check 1200 sqft buffer from INITIAL inference ---
+        best_idx_1200, _ = self.find_best_panel_in_buffer(boxes, confidences, center, radius_1200, meters_per_pixel)
         
-        if best_idx != -1:
+        if best_idx_1200 != -1:
             final_has_solar = True
             final_buffer_size = 1200
-            final_bbox = boxes[best_idx]
-            final_confidence = confidences[best_idx]
+            final_bbox = boxes[best_idx_1200]
+            final_confidence = confidences[best_idx_1200]
             detection_method = "initial"
+        
         else:
-            # Try 1200 Saturated
-            img_sat = self.enhance_saturation(img)
-            res_sat = self.model.predict(img_sat, conf=fallback_conf, augment=True, save=False, verbose=False)[0]
-            sat_boxes = res_sat.boxes.xyxy.tolist() if res_sat.boxes else []
-            sat_confs = res_sat.boxes.conf.tolist() if res_sat.boxes else []
+            # --- STEP 2: Check 1200 sqft from SATURATED inference ---
+            img_enhanced = self.enhance_saturation(img, factor=1.5)
+            results_enhanced = self.model.predict(img_enhanced, conf=fallback_conf, augment=True, save=False, verbose=False)
+            result_enhanced = results_enhanced[0]
             
-            best_sat, _ = self.find_best_panel_in_buffer(sat_boxes, sat_confs, center, radius_1200, meters_per_pixel)
+            enh_boxes = result_enhanced.boxes.xyxy.tolist() if result_enhanced.boxes else []
+            enh_confs = result_enhanced.boxes.conf.tolist() if result_enhanced.boxes else []
             
-            if best_sat != -1:
+            best_enh_1200, _ = self.find_best_panel_in_buffer(enh_boxes, enh_confs, center, radius_1200, meters_per_pixel)
+            
+            if best_enh_1200 != -1:
                 final_has_solar = True
                 final_buffer_size = 1200
-                final_bbox = sat_boxes[best_sat]
-                final_confidence = sat_confs[best_sat]
+                final_bbox = enh_boxes[best_enh_1200]
+                final_confidence = enh_confs[best_enh_1200]
                 detection_method = "saturated_1200"
-                boxes = sat_boxes # For visualization
+                boxes.extend(enh_boxes) # For visualization
+            
             else:
-                # Try 1200 Crop
-                cropped, offset, _ = crop_buffer_region(img, center, radius_1200, padding=30)
-                c_boxes, c_confs = run_inference_on_crop(self.model, cropped, offset, conf=fallback_conf)
-                best_crop, _ = self.find_best_panel_in_buffer(c_boxes, c_confs, center, radius_1200, meters_per_pixel)
+                # --- STEP 3: Check 1200 sqft by CROPPING ---
+                cropped_1200, offset_1200, _ = crop_buffer_region(img, center, radius_1200, padding=30)
+                crop_boxes_1200, crop_confs_1200 = run_inference_on_crop(
+                    self.model, cropped_1200, offset_1200, conf=fallback_conf
+                )
                 
-                if best_crop != -1:
+                best_crop_1200, _ = self.find_best_panel_in_buffer(crop_boxes_1200, crop_confs_1200, center, radius_1200, meters_per_pixel)
+                
+                if best_crop_1200 != -1:
                     final_has_solar = True
                     final_buffer_size = 1200
-                    final_bbox = c_boxes[best_crop]
-                    final_confidence = c_confs[best_crop]
+                    final_bbox = crop_boxes_1200[best_crop_1200]
+                    final_confidence = crop_confs_1200[best_crop_1200]
                     detection_method = "crop_1200"
-                    boxes = c_boxes
+                    boxes.extend(crop_boxes_1200)
+                
                 else:
-                    # Try 2400 Initial (Fallback to larger buffer if 1200 fails entirely)
-                     best_2400, _ = self.find_best_panel_in_buffer(boxes, confidences, center, radius_2400, meters_per_pixel)
-                     if best_2400 != -1:
+                    # --- STEP 4: Check 1200 sqft by CROPPING + SATURATION ---
+                    cropped_1200_sat = self.enhance_saturation(cropped_1200, factor=1.5)
+                    crop_sat_boxes, crop_sat_confs = run_inference_on_crop(
+                        self.model, cropped_1200_sat, offset_1200, conf=fallback_conf
+                    )
+                    
+                    best_crop_sat_1200, _ = self.find_best_panel_in_buffer(crop_sat_boxes, crop_sat_confs, center, radius_1200, meters_per_pixel)
+                    
+                    if best_crop_sat_1200 != -1:
                         final_has_solar = True
-                        final_buffer_size = 2400
-                        final_bbox = boxes[best_2400]
-                        final_confidence = confidences[best_2400]
-                        detection_method = "initial_2400"
-        
-        # --- Rescue Step ---
+                        final_buffer_size = 1200
+                        final_bbox = crop_sat_boxes[best_crop_sat_1200]
+                        final_confidence = crop_sat_confs[best_crop_sat_1200]
+                        detection_method = "crop_sat_1200"
+                        boxes.extend(crop_sat_boxes)
+                    
+                    else:
+                        # --- STEP 5: Check 2400 sqft from INITIAL inference ---
+                        best_idx_2400, _ = self.find_best_panel_in_buffer(boxes, confidences, center, radius_2400, meters_per_pixel)
+                        
+                        if best_idx_2400 != -1:
+                            final_has_solar = True
+                            final_buffer_size = 2400
+                            final_bbox = boxes[best_idx_2400]
+                            final_confidence = confidences[best_idx_2400]
+                            detection_method = "initial_2400"
+                        
+                        else:
+                            # --- STEP 6: Check 2400 sqft from SATURATED inference ---
+                            best_enh_2400, _ = self.find_best_panel_in_buffer(enh_boxes, enh_confs, center, radius_2400, meters_per_pixel)
+                            
+                            if best_enh_2400 != -1:
+                                final_has_solar = True
+                                final_buffer_size = 2400
+                                final_bbox = enh_boxes[best_enh_2400]
+                                final_confidence = enh_confs[best_enh_2400]
+                                detection_method = "saturated_2400"
+                                boxes.extend(enh_boxes)
+                            
+                            else:
+                                # Not found in any method
+                                detection_method = "not_found"
+
+        # --- Rescue Step / Off-center check ---
         if not final_has_solar:
              best_rescue_idx = -1
              min_dist = float('inf')

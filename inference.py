@@ -38,8 +38,8 @@ from ultralytics import YOLO
 
 
 # Size validation constants (for reference/future use)
-MIN_PANEL_AREA_SQM = 1.0      # Minimum realistic panel area (1 sqm)
-MAX_PANEL_AREA_SQM = 100.0    # Maximum realistic panel area (100 sqm)
+MIN_PANEL_AREA_SQM = 0.5     # Minimum realistic panel area (1 sqm)
+MAX_PANEL_AREA_SQM = 1000.0    # Maximum realistic panel area (100 sqm)
 
 
 def enhance_saturation(image, factor=1.5):
@@ -88,7 +88,7 @@ def run_inference_fallback(
     limit=None,
     sample_ids=None,
     initial_conf=0.15,
-    fallback_conf=0.05
+    fallback_conf=0.07
 ):
     """
     Run inference with buffer-based fallback strategy.
@@ -463,7 +463,7 @@ if __name__ == "__main__":
     parser.add_argument('--input', type=str, default="EI_train_data.xlsx", help="Path to input Excel file")
     parser.add_argument('--model', type=str, default="best.pt")
     parser.add_argument('--initial-conf', type=float, default=0.15, help="Initial confidence threshold")
-    parser.add_argument('--fallback-conf', type=float, default=0.05, help="Fallback confidence threshold")
+    parser.add_argument('--fallback-conf', type=float, default=0.15, help="Fallback confidence threshold")
     parser.add_argument('--samples', type=str, default=None, 
                         help="Comma-separated sample IDs or ranges (e.g., '1-10,2501-2510')")
     args = parser.parse_args()
