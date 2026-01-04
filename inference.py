@@ -87,8 +87,8 @@ def run_inference_fallback(
     model_path="best.pt",
     limit=None,
     sample_ids=None,
-    initial_conf=0.15,
-    fallback_conf=0.07
+    initial_conf=0.20,
+    fallback_conf=0.20
 ):
     """
     Run inference with buffer-based fallback strategy.
@@ -297,40 +297,10 @@ def run_inference_fallback(
                                 print(f"  -> Found in 2400 sqft buffer (Saturated)! Conf: {final_confidence:.3f}")
                             
                             else:
-                                # Start with Not Found
+                                # Not found in any method
                                 final_has_solar = False
                                 detection_method = "not_found"
-                                
-                                # --- STEP 7: RESCUE / EDGE CASE ---
-                                # If no panel intersected the buffer, it might be slightly off-center 
-                                # due to geocoding inaccuracies. Check for any high-confidence panel nearby.
-                                print(f"  -> Checking for off-center rescue...")
-                                
-                                best_rescue_idx = -1
-                                min_dist = float('inf')
-                                rescue_threshold_px = radius_2400 * 2.0 # Allow 2x the standard radius
-                                
-                                for i, box in enumerate(boxes):
-                                    # Calculate distance from center to box center
-                                    bx1, by1, bx2, by2 = box
-                                    cx_box = (bx1 + bx2) / 2
-                                    cy_box = (by1 + by2) / 2
-                                    dist = np.sqrt((cx_box - center[0])**2 + (cy_box - center[1])**2)
-                                    
-                                    # Logic: Must be confident (>0.40) and reasonably close
-                                    if confidences[i] > 0.40 and dist < min_dist:
-                                        min_dist = dist
-                                        best_rescue_idx = i
-                                
-                                if best_rescue_idx != -1 and min_dist < rescue_threshold_px:
-                                    final_has_solar = True
-                                    final_buffer_size = 2400 # Assign it to the larger buffer category
-                                    final_bbox = boxes[best_rescue_idx]
-                                    final_confidence = confidences[best_rescue_idx]
-                                    detection_method = "rescued_off_center"
-                                    print(f"  -> RESCUED off-center panel! Dist: {min_dist:.1f}px, Conf: {final_confidence:.3f}")
-                                else:
-                                    print(f"  -> NOT FOUND in any buffer/method (and no rescue candidate)")
+                                print(f"  -> NOT FOUND in any buffer/method")
 
         # Calculate final area if found
         final_dist_m = 0.0
