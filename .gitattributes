@@ -1,2 +1,5 @@
 *.pt filter=lfs diff=lfs merge=lfs -text
 outputs/** filter=lfs diff=lfs merge=lfs -text
+prediction_files/** filter=lfs diff=lfs merge=lfs -text
+artefacts/** filter=lfs diff=lfs merge=lfs -text
+trained_model/** filter=lfs diff=lfs merge=lfs -text

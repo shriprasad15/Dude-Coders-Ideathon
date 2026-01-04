@@ -3,8 +3,9 @@ set -e
 
 # Configuration
 VENV_DIR="venv"
-REQUIREMENTS="requirements.txt"
-SCRIPT="inference.py"
+REQUIREMENTS="environment_details/requirements.txt"
+SCRIPT="pipeline_code/inference.py"
+MODEL="trained_model/model.pt"
 
 echo "==========================================="
 echo "Solar Panel Detection - Automation Script"
@@ -35,8 +36,16 @@ fi
 # 4. Run Inference
 echo "[*] Running inference..."
 if [ -f "$SCRIPT" ]; then
-    # Pass all arguments to the python script
-    python $SCRIPT "$@"
+    # Check if first argument is a file (for backward compatibility)
+    # If first arg exists and doesn't start with --, treat it as --input
+    if [ -n "$1" ] && [[ ! "$1" == --* ]]; then
+        INPUT_FILE="$1"
+        shift
+        python $SCRIPT --model $MODEL --input "$INPUT_FILE" "$@"
+    else
+        # Pass all arguments as-is
+        python $SCRIPT --model $MODEL "$@"
+    fi
 else
     echo "[!] Error: $SCRIPT not found!"
     exit 1

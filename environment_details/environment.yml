@@ -1,0 +1,28 @@
+name: solar-panel-detection
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.12.11
+  - pip
+  - pip:
+    - ultralytics
+    - roboflow
+    - Pillow
+    - pandas
+    - openpyxl
+    - requests
+    - opencv-python
+    - numpy
+    - scipy
+    - python-dotenv
+    - pyyaml
+    - fastapi
+    - uvicorn
+    - python-multipart
+    - google-generativeai
+    - langgraph
+    - langchain-google-genai
+    - langchain-core
+    - pydantic
+    - langchain-openai
